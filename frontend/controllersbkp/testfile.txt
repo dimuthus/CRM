@@ -1,0 +1,389 @@
+
+/*
+		   $select = 'cc.customer_id as customer_id, c.first_name as first_name, c.mobile as mobile, c.email as email';
+		   $query->select($select)
+				->from('customer c')
+				->join('LEFT OUTER JOIN','customer_campaign cc')
+				->where('cc.campaign_id = :campaign', ['campaign' => $campaign])
+				//->groupby('c.first_name');
+				->limit($no_of_customers);
+
+		   $sort = [
+			'defaultOrder' => ['first_name'=>SORT_ASC],
+			'attributes' => [
+				'customer_id'=> [
+                    'asc' => ['customer_id' => SORT_ASC],
+                    'desc' => ['customer_id' => SORT_DESC],
+                    'default' => SORT_DESC
+                ],
+				'first_name',
+				'mobile'=> [
+                    'asc' => ['mobile' => SORT_ASC],
+                    'desc' => ['mobile' => SORT_DESC],
+                    'default' => SORT_DESC
+                ],
+				'email'=>[
+                    'asc' => ['email' => SORT_ASC],
+                    'desc' => ['email' => SORT_DESC],
+                    'default' => SORT_DESC
+                ]
+
+			]
+		   ];
+		   */
+		   $query = new Query;
+		   $query = User::find()
+				->where("role_id = 'Agent' AND status_id = 1")
+				->orderby('username');
+
+			$sort = [
+			'defaultOrder' => ['username'=>SORT_ASC],
+			'attributes' => [
+				'username'=> [
+                    'asc' => ['username' => SORT_ASC],
+                    'desc' => ['username' => SORT_DESC],
+                    'default' => SORT_DESC
+                ],
+				]
+		   ];
+
+
+		    $dataProvider = new ActiveDataProvider([
+			    'pagination' => ['pageSize'=>10],
+				'query' => $query,
+				'sort' => $sort
+			]);
+
+
+//////////////////////////////////////////////////////////////////
+if ($model->load(Yii::$app->request->post())) {
+		/*	$agent = $model->agent_id;
+		   $campaign = $model->campaign_id;
+		   $no_of_customers = $model->no_of_customers;
+           Yii::$app->response->format = Response::FORMAT_JSON;
+			return $this->renderAjax('customer_distribution_list', ['dataProvider'=>$dataProvider]);
+			/*$hasError = false;
+
+
+			return [
+				'body' => $body,
+				'hasError' =>$hasError,
+				'id' => $model->id
+			];*/
+        }
+		else{
+				/*$dataProvider = new ActiveDataProvider([
+					'pagination' => array('pageSize' => 10),
+					'query' => CustomerCampaign::find()->orderby('campaign_id ASC'),//->where(['country_id'=>-1]),
+					'sort' => false
+				]);*/
+
+			return $this->render('redistribute',[
+            'model' => $model,
+        ]);
+		}
+
+
+
+
+
+	//////////////////////////////////////////////////////////////////////////////////////
+
+	<?php
+
+namespace frontend\controllers;
+/*
+use Yii;
+use yii\data\ActiveDataProvider;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\filters\VerbFilter;
+use yii\web\Response;
+use yii\filters\AccessControl;
+use yii\web\UploadedFile;
+use yii\db\Query;
+use yii\helpers\Json;
+*/
+
+use Yii;
+use yii\data\ActiveDataProvider;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\filters\VerbFilter;
+use yii\web\Response;
+use yii\filters\AccessControl;
+use yii\web\UploadedFile;
+use yii\db\Query;
+use yii\helpers\Json;
+
+use frontend\models\distribution\ContactDistribution;
+use frontend\models\distribution\Redistribution;
+use frontend\models\campaign\CustomerCampaign;
+use frontend\models\campaign\Campaign;
+use frontend\modules\tools\models\user\User;
+
+class DistributionController extends \yii\web\Controller
+{
+	public function behaviors()
+    {
+        return [
+            'verbs' => [
+                'class' => VerbFilter::className(),
+                'actions' => [
+                    'delete' => ['post'],
+                ],
+            ],
+
+        ];
+    }
+
+    public function actionRedistribute()
+    {
+		$model = new CustomerCampaign();
+
+		if ($model->load(Yii::$app->request->post()) ) {
+
+        }
+
+        return $this->render('redistribute',[
+            'model' => $model,
+        ]);
+    }
+
+	 public function actionDistribute()
+    {
+		$model = new ContactDistribution();
+
+	//	Yii::$app->response->format = Response::FORMAT_JSON;
+
+
+		$query = new Query;
+	    $query = User::find()
+			->where("role_id = 'Agent' AND status_id = 1")
+			->orderby('username');
+
+		$sort = [
+		'defaultOrder' => ['username'=>SORT_ASC],
+		'attributes' => [
+			'username'=> [
+				'asc' => ['username' => SORT_ASC],
+				'desc' => ['username' => SORT_DESC],
+				'default' => SORT_DESC
+			],
+			]
+	    ];
+		$dataProvider = new ActiveDataProvider([
+			'pagination' => ['pageSize'=>10],
+			'query' => $query,
+			'sort' => $sort
+		]);
+		// something
+
+		if($model->load(Yii::$app->request->post())){
+//			var_dump($_POST);
+
+
+
+		}
+		else{
+			return $this->render('distribute',[
+				'model' => $model,
+				'dataProvider'=>$dataProvider,
+			]);
+		}
+
+    }
+
+}
+<<<<<<< HEAD
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+SELECT `c`.`customer_id`, `age_group`,`gender`,`race`,`nationality`,`cds`.`source_id`, `csd`.`product1`, `city`, `state`, `csd`.`smoker` FROM `customer` AS `c`
+LEFT JOIN `customer_data_source` AS `cds` ON `c`.`id` = `cds`.`customer_id`
+LEFT JOIN `customer_smoking_details` AS `csd` ON `c`.`id` = `csd`.`customer_id`
+WHERE (`age_group`=1 OR `age_group` = 2) AND `race` = 1 AND `nationality` = 158 AND `source_id` = 1 AND `product1` = 1 AND `csd`.`smoker` = 1;
+<<<<<<< HEAD
+=======
+
+
+<?=
+		/*$data = ArrayHelper::map($dataProvider,'username','username');
+
+		$form->field($model,'agent_id')->checkboxList($data);
+
+		$form->field($model,'agent_id')->checkboxList(
+			GridView::widget([
+				'dataProvider' => $dataprovider,
+				'columns' => [
+				['class' => 'yii\grid\SerialColumn'],
+				[
+					'attribute'=>'username',
+				//	'contentOptions'=>['class'=>'col-sm-3']
+				],
+				[
+					'class' => 'yii\grid\CheckboxColumn',
+					'contentOptions'=>['class'=>'col-sm-2']
+				//
+				]
+		      ],
+			])
+		);
+
+		$form->field($model,'agent_id')->checkboxList(
+            ArrayHelper::map(User::find()->where('status_id = :d, role_id = :role', ['d'=>1, 'role'=> 'Agent'])->orderBy('username')->all(), 'id', 'username')
+        //    ['prompt'=>'-----']
+        ); */
+
+
+		?>
+<?php
+$this->registerJs("
+/*
+    $('#distribution-form').submit(function (e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+		var no_of_customers = $('#distribution-no_of_customers').val();
+	//	var reload_url = '".Url::to(['distributionlist'])."?no_of_customers='+ no_of_customers;
+
+		$('#customer_list').show();
+            Loading('customer_list',true);
+            $.ajax({
+              url: $('#distribution-form').attr('action'),
+              type: 'get',
+              data: {'refresh-widget':true,'no_of_customers':no_of_customers},
+              success: function(response) {
+                $('#distribution-list-widget').html(response);
+                Loading('customer_list',true);
+              }
+            });
+
+<<<<<<< HEAD
+    }
+
+}
+<<<<<<< HEAD
+>>>>>>> 9c51e69ab7acadce4f2e478bca824ecea61a1446
+=======
+		//customerList($(this), reload_url, no_of_customers);
+      //  return false;
+    });
+*/
+");
+>>>>>>> jalis_local
+?>
+<?=
+var_dump($customerDataProvider);
+echo "-------------------------------------------------------";
+var_dump($agentDataProvider);
+?>
+
+
+SELECT * FROM `bat_crm`.`undistributed_list` WHERE
+(( age_group=1 OR age_group=2 ) AND (race=1 OR race=2 OR race=3 )
+AND (gender=1 OR gender=2 ) AND (nationality=1 OR nationality=2 OR nationality=158 )
+AND (source_id=1 OR source_id=2 OR source_id=3 ) AND (city=2 OR city=3 )
+AND (state=7 OR state=8 OR state=9 )
+AND (smoker=1 OR smoker=2 ) AND (product=1 OR product=2 ));
+
+
+
+
+
+<<<<<<< HEAD
+>>>>>>> a9ef75bf5089976501ecefdf81985615e20a0c79
+=======
+>>>>>>> 878db2bd8d9726ea112d8e5ecd258f8e1ff6b339
+>>>>>>> jalis_local
+=======
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+SELECT `c`.`customer_id`, `age_group`,`gender`,`race`,`nationality`,`cds`.`source_id`, `csd`.`product1`, `city`, `state`, `csd`.`smoker` FROM `customer` AS `c`
+LEFT JOIN `customer_data_source` AS `cds` ON `c`.`id` = `cds`.`customer_id`
+LEFT JOIN `customer_smoking_details` AS `csd` ON `c`.`id` = `csd`.`customer_id`
+WHERE (`age_group`=1 OR `age_group` = 2) AND `race` = 1 AND `nationality` = 158 AND `source_id` = 1 AND `product1` = 1 AND `csd`.`smoker` = 1;
+<<<<<<< HEAD
+=======
+
+
+<?=
+		/*$data = ArrayHelper::map($dataProvider,'username','username');
+					
+		$form->field($model,'agent_id')->checkboxList($data);
+		
+		$form->field($model,'agent_id')->checkboxList(
+			GridView::widget([
+				'dataProvider' => $dataprovider,
+				'columns' => [
+				['class' => 'yii\grid\SerialColumn'],
+				[
+					'attribute'=>'username',
+				//	'contentOptions'=>['class'=>'col-sm-3']
+				],				
+				[
+					'class' => 'yii\grid\CheckboxColumn',
+					'contentOptions'=>['class'=>'col-sm-2']
+				//	
+				]
+		      ],	
+			])
+		);		
+		
+		$form->field($model,'agent_id')->checkboxList(
+            ArrayHelper::map(User::find()->where('status_id = :d, role_id = :role', ['d'=>1, 'role'=> 'Agent'])->orderBy('username')->all(), 'id', 'username')
+        //    ['prompt'=>'-----']
+        ); */
+		
+		
+		?>
+<?php
+$this->registerJs("
+/*
+    $('#distribution-form').submit(function (e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+		var no_of_customers = $('#distribution-no_of_customers').val();
+	//	var reload_url = '".Url::to(['distributionlist'])."?no_of_customers='+ no_of_customers;	
+		
+		$('#customer_list').show();
+            Loading('customer_list',true);
+            $.ajax({
+              url: $('#distribution-form').attr('action'),
+              type: 'get',
+              data: {'refresh-widget':true,'no_of_customers':no_of_customers},
+              success: function(response) {
+                $('#distribution-list-widget').html(response); 
+                Loading('customer_list',true);
+              }
+            });
+		
+		//customerList($(this), reload_url, no_of_customers);
+      //  return false;
+    });
+*/
+");
+?>
+<?= 
+var_dump($customerDataProvider);
+echo "-------------------------------------------------------";
+var_dump($agentDataProvider);
+?>
+
+
+
+<?= $this->render(Url::to('customer_distribution_list'), [
+                    'customerDataProvider' => $customerDataProvider,
+					'agentDataProvider' => $agentDataProvider,
+					'noofcustomers' => $noofcustomers,
+					
+<?= $this->render(Url::to('distributed_list'), [
+							'customerDataProvider'=>$customerDataProvider,
+							'noofcustomers'=>$noofcustomers,
+							'rd_model' => $rd_model,
+							'model' => $model,
+				]) ?>
+            ]) ?>
+>>>>>>> jalis_local
